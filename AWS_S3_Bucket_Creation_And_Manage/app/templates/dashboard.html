@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | S3 Monitor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <p class="text-uppercase text-muted small fw-semibold mb-1">Overview</p>
+        <h1 class="h3 mb-0">S3 bucket operations</h1>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('main.new_bucket') }}">Create bucket</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="metric-tile">
+            <span>Active buckets</span>
+            <strong>{{ active_count }}</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-tile accent">
+            <span>Deleted buckets</span>
+            <strong>{{ deleted_count }}</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric-tile warm">
+            <span>Recent uploads</span>
+            <strong>{{ uploads|length }}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="h5 mb-0">Buckets</h2>
+                <a href="{{ url_for('main.buckets') }}" class="btn btn-sm btn-outline-secondary">Manage</a>
+            </div>
+            {% include "_bucket_table.html" %}
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="h5 mb-0">Latest uploads</h2>
+            </div>
+            {% if uploads %}
+                <div class="list-group list-group-flush">
+                    {% for upload in uploads[:8] %}
+                        <div class="list-group-item px-0">
+                            <div class="fw-semibold text-truncate">{{ upload.file_name }}</div>
+                            <div class="small text-muted text-truncate">{{ upload.bucket_name }} / {{ upload.object_key }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">No uploads recorded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

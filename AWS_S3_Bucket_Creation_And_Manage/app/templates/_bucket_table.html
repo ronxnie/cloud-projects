@@ -1,0 +1,43 @@
+<div class="table-responsive">
+    <table class="table align-middle table-hover">
+        <thead>
+            <tr>
+                <th>Bucket</th>
+                <th>Status</th>
+                <th>Region</th>
+                <th>Versioning</th>
+                <th>Public Access</th>
+                <th>Encryption</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bucket in buckets %}
+                <tr>
+                    <td>
+                        <div class="fw-semibold">{{ bucket.bucket_name }}</div>
+                        <div class="small text-muted">{{ bucket.bucket_type }}</div>
+                    </td>
+                    <td>
+                        <span class="badge text-bg-{{ 'success' if bucket.status == 'active' else 'secondary' }}">
+                            {{ bucket.status }}
+                        </span>
+                    </td>
+                    <td>{{ bucket.region or "-" }}</td>
+                    <td>{{ bucket.versioning or "-" }}</td>
+                    <td>{{ "Blocked" if bucket.public_access_blocked else "Unblocked" }}</td>
+                    <td>{{ bucket.encryption_type or "-" }}</td>
+                    <td class="text-end">
+                        {% if bucket.status == "active" %}
+                            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.upload', bucket_name=bucket.bucket_name) }}">Upload</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">No buckets in the local database. Run Sync or create a bucket.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
