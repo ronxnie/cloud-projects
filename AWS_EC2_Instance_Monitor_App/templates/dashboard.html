@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Instances | EC2 Monitor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">EC2 Instances</h1>
+        <p class="text-secondary mb-0">Monitor local records and sync the latest state from AWS.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <form method="post" action="{{ url_for('sync_instances') }}">
+            <button class="btn btn-primary action-pulse" type="submit">Sync</button>
+        </form>
+        <a class="btn btn-outline-primary" href="{{ url_for('create_instance') }}">Create EC2</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    {% set running = instances | selectattr("state", "equalto", "running") | list | length %}
+    {% set stopped = instances | selectattr("state", "equalto", "stopped") | list | length %}
+    {% set total = instances | length %}
+    <div class="col-md-4">
+        <div class="metric">
+            <span>Total</span>
+            <strong>{{ total }}</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric metric-success">
+            <span>Running</span>
+            <strong>{{ running }}</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="metric metric-muted">
+            <span>Stopped</span>
+            <strong>{{ stopped }}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="table-wrap">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Instance ID</th>
+                    <th>Type</th>
+                    <th>OS</th>
+                    <th>State</th>
+                    <th>Public IP</th>
+                    <th>Zone</th>
+                    <th>Launch Time</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for instance in instances %}
+                <tr class="instance-row">
+                    <td class="fw-medium">{{ instance.name or "Unnamed" }}</td>
+                    <td><code>{{ instance.instance_id }}</code></td>
+                    <td>{{ instance.instance_type or "-" }}</td>
+                    <td>{{ instance.os_name or instance.image_id or "-" }}</td>
+                    <td>
+                        <span class="status-pill status-{{ instance.state }}">
+                            {{ instance.state }}
+                        </span>
+                    </td>
+                    <td>{{ instance.public_ip or "-" }}</td>
+                    <td>{{ instance.availability_zone or "-" }}</td>
+                    <td>{{ instance.launch_time or "-" }}</td>
+                    <td>
+                        <div class="d-flex justify-content-end gap-2">
+                            {% if instance.state == "stopped" %}
+                                <form method="post" action="{{ url_for('start', instance_id=instance.instance_id) }}">
+                                    <button class="btn btn-sm btn-outline-success" type="submit">Start</button>
+                                </form>
+                            {% endif %}
+                            {% if instance.state == "running" %}
+                                <form method="post" action="{{ url_for('stop', instance_id=instance.instance_id) }}">
+                                    <button class="btn btn-sm btn-outline-secondary" type="submit">Stop</button>
+                                </form>
+                            {% endif %}
+                            {% if instance.state in ["running", "stopped", "pending", "stopping"] %}
+                                <form method="post" action="{{ url_for('terminate', instance_id=instance.instance_id) }}" data-confirm="Terminate {{ instance.instance_id }}?">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Terminate</button>
+                                </form>
+                            {% endif %}
+                            {% if instance.state in ["terminated", "shutting-down"] %}
+                                <form method="post" action="{{ url_for('delete_local', instance_id=instance.instance_id) }}" data-confirm="Delete the local record for {{ instance.instance_id }}?">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="empty-state">
+                        No instances found locally. Click Sync to import from AWS or create a new EC2 instance.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
