@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Buckets | S3 Monitor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <p class="text-uppercase text-muted small fw-semibold mb-1">Inventory</p>
+        <h1 class="h3 mb-0">Buckets</h1>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('main.new_bucket') }}">Create / Import</a>
+</div>
+
+<div class="panel">
+    {% include "_bucket_table.html" %}
+</div>
+
+<div class="row g-4 mt-1">
+    {% for bucket in buckets if bucket.status == "active" %}
+        <div class="col-lg-6 col-xxl-4">
+            <div class="panel h-100">
+                <h2 class="h6 text-truncate">{{ bucket.bucket_name }}</h2>
+                <dl class="row small mb-3">
+                    <dt class="col-5">Ownership</dt><dd class="col-7">{{ bucket.ownership or "-" }}</dd>
+                    <dt class="col-5">Object lock</dt><dd class="col-7">{{ "Enabled" if bucket.object_lock_enabled else "Disabled" }}</dd>
+                    <dt class="col-5">Bucket key</dt><dd class="col-7">{{ "Enabled" if bucket.bucket_key_enabled else "Disabled" }}</dd>
+                    <dt class="col-5">Last sync</dt><dd class="col-7">{{ bucket.last_synced_at }}</dd>
+                </dl>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-sm btn-outline-primary" href="{{ url_for('main.upload', bucket_name=bucket.bucket_name) }}">Upload file</a>
+                    <form method="post" action="{{ url_for('main.remove_bucket', bucket_name=bucket.bucket_name) }}" onsubmit="return confirm('Delete this S3 bucket?');">
+                        <input type="hidden" name="empty_first" value="on">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Empty and delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
