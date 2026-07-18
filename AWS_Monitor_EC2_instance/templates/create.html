@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Create EC2 | EC2 Monitor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Create EC2 Instance</h1>
+        <p class="text-secondary mb-0">Choose the operating system, compute size, and launch settings.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="{{ url_for('dashboard') }}">Back to Instances</a>
+</div>
+
+<form method="post" class="launch-form">
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <section class="panel">
+                <h2 class="h5 mb-3">Core Configuration</h2>
+                <div class="mb-3">
+                    <label class="form-label" for="name">Instance name</label>
+                    <input class="form-control" id="name" name="name" placeholder="web-server-01">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="os_id">Operating system</label>
+                    <select class="form-select" id="os_id" name="os_id" required>
+                        {% for os in operating_systems %}
+                            <option value="{{ os.id }}">{{ os.label }} - default user: {{ os.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label" for="instance_type">Instance type</label>
+                        <select class="form-select" id="instance_type" name="instance_type" required>
+                            {% for instance_type in instance_types %}
+                                <option value="{{ instance_type }}" {% if instance_type == "t2.micro" %}selected{% endif %}>{{ instance_type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="count">Count</label>
+                        <input class="form-control" id="count" name="count" type="number" min="1" max="10" value="1" required>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-lg-5">
+            <section class="panel">
+                <h2 class="h5 mb-3">AWS Options</h2>
+                <div class="mb-3">
+                    <label class="form-label" for="key_name">Key pair name</label>
+                    <input class="form-control" id="key_name" name="key_name" placeholder="my-keypair">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="security_group_ids">Security group IDs</label>
+                    <input class="form-control" id="security_group_ids" name="security_group_ids" placeholder="sg-0123456789abcdef0, sg-abcdef0123456789">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="subnet_id">Subnet ID</label>
+                    <input class="form-control" id="subnet_id" name="subnet_id" placeholder="subnet-0123456789abcdef0">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="iam_instance_profile">IAM instance profile</label>
+                    <input class="form-control" id="iam_instance_profile" name="iam_instance_profile" placeholder="EC2ProfileName">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="volume_size">Root volume size GB</label>
+                    <input class="form-control" id="volume_size" name="volume_size" type="number" min="8" max="1024" placeholder="Leave default">
+                </div>
+
+                <button class="btn btn-primary w-100 action-pulse" type="submit">Launch Instance</button>
+            </section>
+        </div>
+    </div>
+</form>
+{% endblock %}
