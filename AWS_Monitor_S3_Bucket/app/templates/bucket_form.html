@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Create Bucket | S3 Monitor{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="text-uppercase text-muted small fw-semibold mb-1">Create</p>
+                    <h1 class="h4 mb-0">New S3 bucket</h1>
+                </div>
+            </div>
+            <form method="post" class="row g-3">
+                <input type="hidden" name="action" value="create">
+                <div class="col-md-6">
+                    <label class="form-label">Bucket type</label>
+                    <select class="form-select" name="bucket_type">
+                        {% for value, label in bucket_type_options %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">General purpose buckets are fully supported.</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">AWS region</label>
+                    <input class="form-control" name="region" placeholder="us-east-1">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Namespace</label>
+                    <input class="form-control" name="namespace" placeholder="team-dev">
+                </div>
+                <div class="col-md-7">
+                    <label class="form-label">Bucket name</label>
+                    <input class="form-control" name="bucket_name" required placeholder="logs-archive-001">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Object ownership</label>
+                    <select class="form-select" name="ownership">
+                        {% for value, label in ownership_options %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Default encryption</label>
+                    <select class="form-select" name="encryption_type" id="encryptionType">
+                        {% for value, label in encryption_options %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12" id="kmsField">
+                    <label class="form-label">KMS key ID or ARN</label>
+                    <input class="form-control" name="kms_key_id" placeholder="Optional for SSE-KMS">
+                </div>
+                <div class="col-md-6">
+                    <div class="option-box">
+                        <div>
+                            <strong>Block public access</strong>
+                            <span>Recommended for most buckets</span>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="public_access_blocked" checked>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="option-box">
+                        <div>
+                            <strong>Bucket versioning</strong>
+                            <span>Required when Object Lock is enabled</span>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="versioning">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="option-box">
+                        <div>
+                            <strong>Bucket key</strong>
+                            <span>Reduces KMS request cost for SSE-KMS</span>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="bucket_key_enabled">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="option-box">
+                        <div>
+                            <strong>Object Lock</strong>
+                            <span>Can only be enabled during creation</span>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="object_lock_enabled">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Tags</label>
+                    <textarea class="form-control" name="tags" rows="4" placeholder="Environment=Dev&#10;Owner=CloudTeam"></textarea>
+                    <div class="form-text">Optional. Add one key=value pair per line.</div>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-primary" type="submit">Create bucket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="panel">
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Existing</p>
+            <h2 class="h5">Import AWS bucket</h2>
+            <form method="post" class="mt-3">
+                <input type="hidden" name="action" value="import">
+                <label class="form-label">Select existing bucket</label>
+                <select class="form-select mb-3" name="existing_bucket">
+                    <option value="">Choose bucket</option>
+                    {% for bucket in aws_buckets %}
+                        <option value="{{ bucket.bucket_name }}">{{ bucket.bucket_name }}{% if bucket.region %} ({{ bucket.region }}){% endif %}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-outline-primary w-100" type="submit">Import selected bucket</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

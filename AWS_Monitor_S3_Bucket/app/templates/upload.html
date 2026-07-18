@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Upload | S3 Monitor{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-xl-5">
+        <div class="panel">
+            <p class="text-uppercase text-muted small fw-semibold mb-1">Upload</p>
+            <h1 class="h4 text-truncate">{{ bucket.bucket_name }}</h1>
+            <form method="post" enctype="multipart/form-data" class="mt-3">
+                <div class="mb-3">
+                    <label class="form-label">File</label>
+                    <input class="form-control" type="file" name="file" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Object key</label>
+                    <input class="form-control" name="object_key" placeholder="Optional path/name in bucket">
+                </div>
+                <button class="btn btn-primary" type="submit">Upload to S3</button>
+                <a class="btn btn-outline-secondary" href="{{ url_for('main.buckets') }}">Back</a>
+            </form>
+        </div>
+    </div>
+    <div class="col-xl-7">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="h5 mb-0">Upload history</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Object key</th>
+                            <th>Uploaded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for upload in uploads %}
+                            <tr>
+                                <td>{{ upload.file_name }}</td>
+                                <td class="text-break">{{ upload.object_key }}</td>
+                                <td>{{ upload.uploaded_at }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="3" class="text-center text-muted py-4">No uploads for this bucket yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
